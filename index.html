@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Artale Papu Pro Mobile</title>
+    <style>
+        :root {
+            --bg: #0a0a0c;
+            --card-bg: #16161a;
+            --primary: #00f2ff;
+            --danger: #ff3e3e;
+            --warning: #ffbe0b;
+            --success: #00ff88;
+        }
+        body {
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh; box-sizing: border-box;
+            overflow: hidden; touch-action: manipulation;
+        }
+        h2 { margin: 0 0 20px 0; color: var(--success); letter-spacing: 2px; font-size: 1.2rem; }
+        
+        .grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 12px; width: 100%; max-width: 400px;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px 5px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .card::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: #333;
+        }
+        .card.active::before { background: var(--primary); }
+        .card.warn::before { background: var(--warning); }
+        .card.crit { border-color: var(--danger); animation: shake 0.5s infinite; }
+        .card.crit::before { background: var(--danger); }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
+        }
+
+        .icon { font-size: 1.5rem; display: block; margin-bottom: 5px; }
+        .name { font-size: 0.8rem; color: #888; display: block; margin-bottom: 5px; }
+        .time { font-size: 2rem; font-weight: 800; font-family: 'Consolas', monospace; color: var(--primary); }
+        
+        .reset-area {
+            margin-top: auto; width: 100%; max-width: 400px;
+            padding-bottom: 20px;
+        }
+        .reset-btn {
+            width: 100%; padding: 20px;
+            background: linear-gradient(135deg, #00ff88 0%, #00bd65 100%);
+            color: #000; border: none; border-radius: 12px;
+            font-size: 1.5rem; font-weight: 900;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+            transition: transform 0.1s;
+        }
+        .reset-btn:active { transform: scale(0.95); filter: brightness(1.2); }
+    </style>
+</head>
+<body>
+    <h2>ARTALE PAPU PRO</h2>
+    <div class="grid" id="hud"></div>
+    <div class="reset-area">
+        <button class="reset-btn" onclick="reset()">SYNC START</button>
+    </div>
+
+    <script>
+        const mechs = [
+            { n: "鬧鐘全螢幕", i: "⏰", c: 60 },
+            { n: "雷射對齊", i: "⚡", c: 30 },
+            { n: "時空裂縫", i: "💠", c: 45 },
+            { n: "消技詛咒", i: "🚫", c: 22 },
+            { n: "潛水避難", i: "🌑", c: 80 },
+            { n: "自訂備用", i: "🛠️", c: 100 }
+        ];
+
+        let start = Date.now();
+        function reset() { 
+            start = Date.now();
+            navigator.vibrate?.(50); // 手機震動回饋
+        }
+
+        function draw() {
+            const hud = document.getElementById('hud');
+            hud.innerHTML = mechs.map((m, idx) => `
+                <div class="card" id="c${idx}">
+                    <span class="icon">${m.i}</span>
+                    <span class="name">${m.n}</span>
+                    <div class="time" id="t${idx}">--</div>
+                </div>
+            `).join('');
+        }
+
+        function tick() {
+            const now = (Date.now() - start) / 1000;
+            mechs.forEach((m, idx) => {
+                const rem = Math.ceil(m.c - (now % m.c));
+                const tEl = document.getElementById(`t${idx}`);
+                const cEl = document.getElementById(`c${idx}`);
+                tEl.innerText = rem + "s";
+                
+                cEl.className = "card active";
+                if (rem <= 5) { cEl.className = "card crit"; tEl.style.color = "var(--danger)"; }
+                else if (rem <= 12) { cEl.className = "card warn"; tEl.style.color = "var(--warning)"; }
+                else { tEl.style.color = "var(--primary)"; }
+            });
+            requestAnimationFrame(tick);
+        }
+        draw(); tick();
+    </script>
+</body>
+</html>
