@@ -1,126 +1,98 @@
+
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Artale Papu Pro Mobile</title>
+    <title>拉圖斯助手-獨立炸彈版</title>
     <style>
-        :root {
-            --bg: #0a0a0c;
-            --card-bg: #16161a;
-            --primary: #00f2ff;
-            --danger: #ff3e3e;
-            --warning: #ffbe0b;
-            --success: #00ff88;
+        body { background: #121212; color: white; font-family: sans-serif; display: flex; flex-wrap: wrap; justify-content: space-around; padding: 10px; user-select: none; touch-action: manipulation; }
+        .btn { width: 48%; padding: 18px; border-radius: 10px; font-weight: bold; border: none; margin-bottom: 20px; color: white; font-size: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .btn:active { transform: scale(0.95); opacity: 0.8; }
+        .card { background: #1e1e1e; border-radius: 12px; width: 45%; margin-bottom: 12px; padding: 15px 0; text-align: center; border: 2px solid #444; }
+        .t { font-size: 24px; font-weight: bold; font-family: 'Courier New', monospace; margin-top: 5px; }
+        .flash { animation: slow-flash 0.5s infinite; } 
+        @keyframes slow-flash { 
+            0% { background: #1e1e1e; }
+            50% { background: #c0392b; } 
+            100% { background: #1e1e1e; }
         }
-        body {
-            background-color: var(--bg);
-            color: #fff;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            margin: 0; padding: 20px;
-            display: flex; flex-direction: column; align-items: center;
-            height: 100vh; box-sizing: border-box;
-            overflow: hidden; touch-action: manipulation;
-        }
-        h2 { margin: 0 0 20px 0; color: var(--success); letter-spacing: 2px; font-size: 1.2rem; }
-        
-        .grid {
-            display: grid; grid-template-columns: 1fr 1fr;
-            gap: 12px; width: 100%; max-width: 400px;
-        }
-        .card {
-            background: var(--card-bg);
-            border: 1px solid #333;
-            border-radius: 12px;
-            padding: 15px 5px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
-        .card::before {
-            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: #333;
-        }
-        .card.active::before { background: var(--primary); }
-        .card.warn::before { background: var(--warning); }
-        .card.crit { border-color: var(--danger); animation: shake 0.5s infinite; }
-        .card.crit::before { background: var(--danger); }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-2px); }
-            75% { transform: translateX(2px); }
-        }
-
-        .icon { font-size: 1.5rem; display: block; margin-bottom: 5px; }
-        .name { font-size: 0.8rem; color: #888; display: block; margin-bottom: 5px; }
-        .time { font-size: 2rem; font-weight: 800; font-family: 'Consolas', monospace; color: var(--primary); }
-        
-        .reset-area {
-            margin-top: auto; width: 100%; max-width: 400px;
-            padding-bottom: 20px;
-        }
-        .reset-btn {
-            width: 100%; padding: 20px;
-            background: linear-gradient(135deg, #00ff88 0%, #00bd65 100%);
-            color: #000; border: none; border-radius: 12px;
-            font-size: 1.5rem; font-weight: 900;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
-            transition: transform 0.1s;
-        }
-        .reset-btn:active { transform: scale(0.95); filter: brightness(1.2); }
+        .warn { color: #ff4757 !important; }
     </style>
 </head>
 <body>
-    <h2>ARTALE PAPU PRO</h2>
-    <div class="grid" id="hud"></div>
-    <div class="reset-area">
-        <button class="reset-btn" onclick="reset()">SYNC START</button>
-    </div>
+    <button class="btn" style="background: #c0392b" onclick="manualTriggerF1()">【F1】大連動</button>
+    <button class="btn" style="background: #2980b9" onclick="triggerF3()">【F3】黑水連動</button>
 
-    <script>
-        const mechs = [
-            { n: "鬧鐘全螢幕", i: "⏰", c: 60 },
-            { n: "雷射對齊", i: "⚡", c: 30 },
-            { n: "時空裂縫", i: "💠", c: 45 },
-            { n: "消技詛咒", i: "🚫", c: 22 },
-            { n: "潛水避難", i: "🌑", c: 80 },
-            
-        ];
+    <div id="shield" class="card" style="border-color: #e67e22">⚔️ 反盾(F1)<div class="t">READY</div></div>
+    <div id="mob" class="card" style="border-color: #2ecc71">⏰ 小怪<div class="t">READY</div></div>
+    <div id="orb" class="card" style="border-color: #a29bfe">✨ 黑球<div class="t">READY</div></div>
+    <div id="bomb" class="card" style="border-color: #f1c40f" onclick="triggerF2()">💣 炸彈(F2)<div class="t">READY</div></div>
+    <div id="water" class="card" style="border-color: #3498db">💧 黑水(F3)<div class="t">READY</div></div>
+    <div id="stay" class="card" style="border-color: #00d2d3">⏳ 持續時間<div class="t">READY</div></div>
 
-        let start = Date.now();
-        function reset() { 
-            start = Date.now();
-            navigator.vibrate?.(50); // 手機震動回饋
+<script>
+    const timers = {
+        shield: { v:0, m:120, auto:true }, 
+        mob:    { v:0, m:50,  auto:true },
+        orb:    { v:0, m:14,  auto:false }, 
+        bomb:   { v:0, m:30,  auto:false },
+        water:  { v:0, m:70,  auto:true }, 
+        stay:   { v:0, m:30,  auto:false }
+    };
+
+    // F1 手動按下：啟動所有，包含炸彈
+    function manualTriggerF1() {
+        timers.shield.v = 120;
+        timers.mob.v = 50;
+        timers.orb.v = 14;
+        timers.bomb.v = 30; // 只有手動按 F1 會動到炸彈
+    }
+
+    // F1 自動循環觸發：不包含炸彈
+    function autoTriggerF1() {
+        timers.shield.v = 120;
+        timers.mob.v = 50;
+        timers.orb.v = 14;
+        // 這裡不重置炸彈
+    }
+
+    function triggerF2() {
+        timers.bomb.v = 30;
+    }
+
+    function triggerF3() {
+        timers.water.v = 70;
+        timers.stay.v = 30;
+    }
+
+    setInterval(() => {
+        for (let k in timers) {
+            let t = timers[k]; 
+            let el = document.getElementById(k);
+            let timeDisplay = el.querySelector('.t');
+
+            if(t.v > 0) {
+                t.v = Math.max(0, t.v - 0.1);
+                timeDisplay.innerText = t.v.toFixed(1) + "s";
+
+                if(k == 'bomb' && t.v > 25) { el.classList.add('flash'); } 
+                else { el.classList.remove('flash'); }
+
+                if(t.v <= 5) { timeDisplay.classList.add('warn'); } 
+                else { timeDisplay.classList.remove('warn'); }
+
+                if(t.v <= 0 && t.auto) {
+                    if (k == 'shield') autoTriggerF1(); // 自動循環不帶炸彈
+                    if (k == 'water') triggerF3();
+                }
+            } else {
+                timeDisplay.innerText = "READY";
+                timeDisplay.classList.remove('warn');
+                el.classList.remove('flash');
+            }
         }
-
-        function draw() {
-            const hud = document.getElementById('hud');
-            hud.innerHTML = mechs.map((m, idx) => `
-                <div class="card" id="c${idx}">
-                    <span class="icon">${m.i}</span>
-                    <span class="name">${m.n}</span>
-                    <div class="time" id="t${idx}">--</div>
-                </div>
-            `).join('');
-        }
-
-        function tick() {
-            const now = (Date.now() - start) / 1000;
-            mechs.forEach((m, idx) => {
-                const rem = Math.ceil(m.c - (now % m.c));
-                const tEl = document.getElementById(`t${idx}`);
-                const cEl = document.getElementById(`c${idx}`);
-                tEl.innerText = rem + "s";
-                
-                cEl.className = "card active";
-                if (rem <= 5) { cEl.className = "card crit"; tEl.style.color = "var(--danger)"; }
-                else if (rem <= 12) { cEl.className = "card warn"; tEl.style.color = "var(--warning)"; }
-                else { tEl.style.color = "var(--primary)"; }
-            });
-            requestAnimationFrame(tick);
-        }
-        draw(); tick();
-    </script>
+    }, 100);
+</script>
 </body>
 </html>
